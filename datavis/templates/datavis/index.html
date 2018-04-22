@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+{% load chartkick %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+{% block body %}
+<table>
+{% for key, value in data.items %}
+    {%for a,b in value.items%}
+        <tr>
+            <td> {{ a }}: </td><td> {{ b }} </td>
+        </tr>
+    {%endfor%}
+</table>
+{%endfor%}
+{% endblock %}
+</html>
