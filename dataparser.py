@@ -14,34 +14,47 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "FallDetect.settings")
 class MyDict(dict):
     pass
 
-"""
-with open('wearable.json', 'r') as handle:
-    json_data = [json.loads(line) for line in handle]
-for i in range(len(json_data)):
-    dict=MyDict()
-    dictless={}
-    id = json_data[i]["_id"]["$oid"]
-    if hasattr(json_data[i],"e"):
-        t = json_data[i]["e"][0]["t"]
-        accel = json_data[i]["e"][0]["v"]
-    else:
-        t=0
-        accel=[0,0,0]
-    timestamp = json_data[i]["bt"]["$date"]
-    parsedtimestamp = dateutil.parser.parse(timestamp)
-    result = parsedtimestamp - datetime.timedelta(seconds=t)
-    dictless["id"]=id
-    dictless["result"]=result
-    dictless["acceleration"]=accel
-    dictionarystore[i]=dictless
-
-print(dictionarystore)
-"""
 from pymongo import MongoClient
 
 client = MongoClient()
 
 client = MongoClient('localhost', 27017)
+"""
+wearablestore={}
+store=[]
+with open('wearable.json', 'r') as handle:
+    json_data = [json.loads(line) for line in handle]
+db = client.wearable
+parameters = db.parameters
+for i in range(len(json_data)):
+    dictless={}
+    #print(json_data[i])
+    if json_data[i].get('e'):
+        uid=json_data[i]["uid"][-2:]
+        t = json_data[i]["e"][0]["t"]
+        accel = json_data[i]["e"][0]["v"]
+        id = json_data[i]["_id"]["$oid"]
+        timestamp = json_data[i]["bt"]["$date"]
+        if uid=="c0" or uid=="c1":
+            t=t/2
+            parsedtimestamp = dateutil.parser.parse(timestamp)
+            result = parsedtimestamp - datetime.timedelta(seconds=t)
+            dictless["id"]=id
+            dictless["uid"]=uid
+            dictless["result"]=result
+            dictless["acceleration"]=accel
+        parsedtimestamp = dateutil.parser.parse(timestamp)
+        result = parsedtimestamp - datetime.timedelta(seconds=t)
+        dictless["id"]=id
+        dictless["uid"]=uid
+        dictless["result"]=result
+        dictless["acceleration"]=accel
+        print(i)
+    #wearablestore[str(i)]=dictless
+    store.append(dictless)
+parameters.insert_many(store)
+"""
+#print(wearablestore)
 
 #client = MongoClient('mongodb://localhost:27017/')
 with open('video.json', 'r') as handle:
@@ -50,7 +63,7 @@ jumps=[d for d in xrange(0, 115808, 10528)]
 print(jumps)
 videoarray=[]
 itemsarray=[]
-db = client.datavis
+db = client.Video
 videocolin = db.videocol
 itemscolin = db.itemcol
 for mul in range(len(jumps)-1):
@@ -71,9 +84,11 @@ for mul in range(len(jumps)-1):
             #print("haha")
             #print(item)
             if item["n"]=="silhouette":
+                data["id"] = id
                 data["type"]="silhouette"
                 data["imagevalue"]=item["v"]
             else:
+                data["id"] = id
                 if item["n"]=="frameId":
                     data["type"]="frameId"
                     data["frameid"]=item["v"]
@@ -95,7 +110,7 @@ for mul in range(len(jumps)-1):
                 elif item["n"]=="userID":
                     data["type"]="userID"
                     data["userid"]=item["v"]
-            items.append(data)
+            itemsarray.append(data)
         else:
             count+=1
         #dictless["items"]=items
@@ -103,13 +118,15 @@ for mul in range(len(jumps)-1):
         dictless["id"]=id
         dictless["uid"]=uid
         dictless["date"]=parsedtimestamp
+        videoarray.append(dictless)
         #print(dictless)
         #print(count)
-        dictionarystore[str(i)]=dictless
+        #dictionarystore[str(i)]=dictless
         #print(items)
-        itemstore[str(i)]=items
+        #itemstore[str(i)]=items
         print(i)
     #tens=(l*10000 for l in range(5900))
+    """
     print(mul,mulend)
     keys=(i for i in range(jumps[mul],jumps[mulend]))
     dictionarystore={str(k):dictionarystore[str(k)] for k in keys}
@@ -118,6 +135,7 @@ for mul in range(len(jumps)-1):
     itemstore={str(j):itemstore[str(j)] for j in jeys}
     videoarray.append(dictionarystore)
     itemsarray.append(itemstore)
+    """
 #print(videoarray)
 #print(itemsarray)
 videocolin.insert_many(videoarray)
