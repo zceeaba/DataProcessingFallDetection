@@ -5,17 +5,17 @@ import dateutil.parser
 import pymongo
 from matplotlib import pyplot as plt
 #client = MongoClient()
-#client=pymongo.MongoClient('mongodb+srv://jayab96:H32yTpSBGi4xhVTO@ads-z5r3r.mongodb.net/first')
+#client=pymongo.MongoClient('mongodb+srv://jayab96:H32yTpSBGi4xhVTO@ads-z5r3r.mongodb.net/')
 #client = MongoClient(<Atlas connection string>)
 
-client = pymongo.MongoClient('mongodb://localhost:27017/')
+#client = pymongo.MongoClient('mongodb://localhost:27017/')
 
 wearablestore={}
 store=[]
 with open('wearable.json', 'r') as handle:
     json_data = [json.loads(line) for line in handle]
-db = client.wearabletest
-parameters = db.parameters
+#db = client.wearabletest
+#parameters = db.parameters
 finallist=[]
 finallistb=[]
 xlist, ylist, zlist = [], [], []
@@ -25,12 +25,13 @@ xtlista,ytlista,ztlista=[],[],[]
 tlist=[]
 falls={}
 flag=3
+groundnewlist=[]
+groundnewlistb=[]
+groundtlist=[]
+groundtlistb=[]
 for i in range(len(json_data)):
     importantdict = {}
     dictless={}
-    timeoffall = []
-    timeofland = []
-    timeofrest = []
     #startimes=[17:27:56,17:15:56]
     #times={[8,10,21,23],[41s,45s,57,61],[75,80,93,97],[110,114,126,129],[142,146,159,164],[178,183,195,198],[219,222,234,237],[258,262,274,278],[299,303,313,317],[332,335,349,353],[378,382,392,396],[420,424,435,440],[452,456,466,470],[486,491,501,507]}
     #timesb=[[8,10,21,25],[36,39,53,56],[68,72,86,91],[99,102,118,122],[134,138,151,155],[168,173,190,192],[210,212,230,235],[249,252,269,272],[281,283,302,306],[317,320,339,342],[357,360,373,377],[391,394,410,413],[426,429,443,446],[456,459,471,474]]
@@ -67,7 +68,7 @@ for i in range(len(json_data)):
             dictless["result"]=result
             dictless["acceleration"]=accel
         #dictless["groundtruthstate"]=3
-        groundtruthstate=[0,1,2,3]
+        fallstate=[0,1,2,3]
         parsedtimestamp = dateutil.parser.parse(timestamp)
         naive = parsedtimestamp.replace(tzinfo=None)
         times = [[8, 10, 21, 23], [41, 45, 57, 61], [75, 80, 93, 97], [110, 114, 126, 129], [142, 146, 159, 164],
@@ -80,101 +81,112 @@ for i in range(len(json_data)):
                   [456, 459, 471, 474]]
 
         if naive>datetime.datetime(2018, 03, 22, 17, 27, 56, 000) and naive<datetime.datetime(2018, 03, 22, 17,36,46 , 000) :
-            for list in times:
-                for index in range(len(list)):
-                    eventimestamp = datetime.datetime(2018, 03, 22, 17, 27, 56, 000) + datetime.timedelta(0, list[index])
-                    checktime=(eventimestamp - naive).total_seconds()
-                    #print(checktime)
-                    if checktime<1 and checktime >-1:
-                        dictless["groundtruthstate"]=index
-                        flag=index
+            if dictless["uid"]=="c0" or dictless["uid"]=="c1":
+                print(dictless["uid"])
+                for list in times:
+                    for index in range(len(list)):
+                        eventimestamp = datetime.datetime(2018, 03, 22, 17, 27, 56, 000) + datetime.timedelta(0, list[index])
+                        checktime=(eventimestamp - naive).total_seconds()
+                        #print(checktime)
+                        if checktime<1 and checktime >-1:
+                            dictless["groundtruthstate"]=index
+                            flag=index
+                if flag == 1:
+                    dictless["groundtruthstate"] = 1
+                elif flag == 2:
+                    dictless["groundtruthstate"] = 2
+                elif flag == 0:
+                    dictless["groundtruthstate"] = 0
+                else:
+                    dictless["groundtruthstate"] = 3
 
-            if flag == 1:
-                dictless["groundtruthstate"] = 1
-            elif flag == 2:
-                dictless["groundtruthstate"] = 2
-            elif flag == 0:
-                dictless["groundtruthstate"] = 0
-            else:
-                dictless["groundtruthstate"] = 3
-            if abs(dictless["acceleration"][0])>7:
-                #print(naive)
-                print("x: "+str(i))
-                xlist.append(dictless["acceleration"][0])
-                xtlist.append(i)
-            if  abs(dictless["acceleration"][1]) > 7:
-                #print(naive)
-                print("y: " + str(i))
-                ylist.append(dictless["acceleration"][1])
-                ytlist.append(i)
-            if abs(dictless["acceleration"][2]) > 7:
-                #print(naive)
-                print("z: " + str(i))
-                zlist.append(dictless["acceleration"][2])
-                ztlist.append(i)
-            importantdict["timestamp"]=naive
-            importantdict["groundtruth"]=dictless["groundtruthstate"]
-            finallist.append(importantdict)
+                if abs(dictless["acceleration"][0])>7:
+                    #print(naive)
+                    print("x: "+str(i))
+                    xlist.append(dictless["acceleration"][0])
+                    xtlist.append(i)
+                if  abs(dictless["acceleration"][1]) > 7:
+                    #print(naive)
+                    print("y: " + str(i))
+                    ylist.append(dictless["acceleration"][1])
+                    ytlist.append(i)
+                if abs(dictless["acceleration"][2]) > 7:
+                    #print(naive)
+                    print("z: " + str(i))
+                    zlist.append(dictless["acceleration"][2])
+                    ztlist.append(i)
+                importantdict["timestamp"]=naive
+                importantdict["groundtruth"]=dictless["groundtruthstate"]
+                groundnewlist.append(dictless["groundtruthstate"])
+                groundtlist.append(i)
+                finallist.append(importantdict)
         else:
             dictless["groundtruthstate"]=5
         if naive>datetime.datetime(2018, 03, 22, 17, 15, 56, 000) and naive<datetime.datetime(2018, 03, 22, 17,24,02 , 000) :
-            for list in timesb:
-                for index in range(len(list)):
-                    eventimestamp = datetime.datetime(2018, 03, 22, 17, 15, 56, 000) + datetime.timedelta(0, list[index])
-                    checktime=(eventimestamp - naive).total_seconds()
-                    #print(checktime)
-                    if checktime<1 and checktime >-1:
-                        dictless["groundtruthstate"]=index
-                        flag=index
+            if dictless["uid"]=="c0" or dictless["uid"]=="c1":
+                print(dictless["uid"])
+                for list in timesb:
+                    for index in range(len(list)):
+                        eventimestamp = datetime.datetime(2018, 03, 22, 17, 15, 56, 000) + datetime.timedelta(0, list[index])
+                        checktime=(eventimestamp - naive).total_seconds()
+                        #print(checktime)
+                        if checktime<1 and checktime >-1:
+                            dictless["groundtruthstate"]=index
+                            flag=index
 
-            if flag == 1:
-                dictless["groundtruthstate"] = 1
-            elif flag == 2:
-                dictless["groundtruthstate"] = 2
-            elif flag == 0:
-                dictless["groundtruthstate"] = 0
-            else:
-                dictless["groundtruthstate"] = 3
-            if abs(dictless["acceleration"][0])>7:
-                print(naive)
-                print("x: "+str(i))
-                xlista.append(dictless["acceleration"][0])
-                xtlista.append(i)
-            if  abs(dictless["acceleration"][1]) > 7:
-                print(naive)
-                print("y: " + str(i))
-                ylista.append(dictless["acceleration"][1])
-                ytlista.append(i)
-            if abs(dictless["acceleration"][2]) > 7:
-                print(naive)
-                print("z: " + str(i))
-                zlista.append(dictless["acceleration"][2])
-                ztlista.append(i)
-            importantdict["timestamp"]=naive
-            importantdict["groundtruth"]=dictless["groundtruthstate"]
-            finallistb.append(importantdict)
+                if flag == 1:
+                    dictless["groundtruthstate"] = 1
+                elif flag == 2:
+                    dictless["groundtruthstate"] = 2
+                elif flag == 0:
+                    dictless["groundtruthstate"] = 0
+                else:
+                    dictless["groundtruthstate"] = 3
+
+                if abs(dictless["acceleration"][0])>7:
+                    print(naive)
+                    print("x: "+str(i))
+                    xlista.append(dictless["acceleration"][0])
+                    xtlista.append(i)
+                if  abs(dictless["acceleration"][1]) > 7:
+                    print(naive)
+                    print("y: " + str(i))
+                    ylista.append(dictless["acceleration"][1])
+                    ytlista.append(i)
+                if abs(dictless["acceleration"][2]) > 7:
+                    print(naive)
+                    print("z: " + str(i))
+                    zlista.append(dictless["acceleration"][2])
+                    ztlista.append(i)
+                print(dictless["groundtruthstate"])
+                importantdict["timestamp"]=naive
+                importantdict["groundtruth"]=dictless["groundtruthstate"]
+                groundnewlistb.append(dictless["groundtruthstate"])
+                groundtlistb.append(i)
+                finallistb.append(importantdict)
         else:
             dictless["groundtruthstate"]=5
 
-        finallist.append(dictless)
+        #finallist.append(dictless)
 
 #print(finallist)
 
-"""
+
 plt.scatter(xtlist,xlist)
 plt.scatter(ytlist,ylist)
 plt.scatter(ztlist,zlist)
+plt.scatter(groundtlist,groundnewlist)
 plt.show()
 plt.scatter(xtlista,xlista)
 plt.scatter(ytlista,ylista)
 plt.scatter(ztlista,zlista)
 plt.show()
-"""
+
 
 
 #wearablestore[str(i)]=dictless
 #store.append(dictless)
-parameters.insert_many(finallist)
+#parameters.insert_many(finallist)
 
 """
 #print(wearablestore)
