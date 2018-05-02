@@ -5,17 +5,19 @@ import dateutil.parser
 import pymongo
 from matplotlib import pyplot as plt
 #client = MongoClient()
-client=pymongo.MongoClient('mongodb+srv://jayab96:H32yTpSBGi4xhVTO@ads-z5r3r.mongodb.net/first')
+#client=pymongo.MongoClient('mongodb+srv://jayab96:H32yTpSBGi4xhVTO@ads-z5r3r.mongodb.net/first')
 #client = MongoClient(<Atlas connection string>)
 
+client = pymongo.MongoClient('mongodb://localhost:27017/')
 
 wearablestore={}
 store=[]
 with open('wearable.json', 'r') as handle:
     json_data = [json.loads(line) for line in handle]
-db = client.wearable
+db = client.wearabletest
 parameters = db.parameters
 finallist=[]
+finallistb=[]
 xlist, ylist, zlist = [], [], []
 xtlist,ytlist,ztlist=[],[],[]
 xlista, ylista, zlista = [], [], []
@@ -72,6 +74,11 @@ for i in range(len(json_data)):
                  [178, 183, 195, 198], [219, 222, 234, 237], [258, 262, 274, 278], [299, 303, 313, 317],
                  [332, 335, 349, 353], [378, 382, 392, 396], [420, 424, 435, 440], [452, 456, 466, 470],
                  [486, 491, 501, 507]]
+        timesb = [[8, 10, 21, 25], [36, 39, 53, 56], [68, 72, 86, 91], [99, 102, 118, 122], [134, 138, 151, 155],
+                  [168, 173, 190, 192], [210, 212, 230, 235], [249, 252, 269, 272], [281, 283, 302, 306],
+                  [317, 320, 339, 342], [357, 360, 373, 377], [391, 394, 410, 413], [426, 429, 443, 446],
+                  [456, 459, 471, 474]]
+
         if naive>datetime.datetime(2018, 03, 22, 17, 27, 56, 000) and naive<datetime.datetime(2018, 03, 22, 17,36,46 , 000) :
             for list in times:
                 for index in range(len(list)):
@@ -108,7 +115,26 @@ for i in range(len(json_data)):
             importantdict["timestamp"]=naive
             importantdict["groundtruth"]=dictless["groundtruthstate"]
             finallist.append(importantdict)
+        else:
+            dictless["groundtruthstate"]=5
         if naive>datetime.datetime(2018, 03, 22, 17, 15, 56, 000) and naive<datetime.datetime(2018, 03, 22, 17,24,02 , 000) :
+            for list in timesb:
+                for index in range(len(list)):
+                    eventimestamp = datetime.datetime(2018, 03, 22, 17, 15, 56, 000) + datetime.timedelta(0, list[index])
+                    checktime=(eventimestamp - naive).total_seconds()
+                    #print(checktime)
+                    if checktime<1 and checktime >-1:
+                        dictless["groundtruthstate"]=index
+                        flag=index
+
+            if flag == 1:
+                dictless["groundtruthstate"] = 1
+            elif flag == 2:
+                dictless["groundtruthstate"] = 2
+            elif flag == 0:
+                dictless["groundtruthstate"] = 0
+            else:
+                dictless["groundtruthstate"] = 3
             if abs(dictless["acceleration"][0])>7:
                 print(naive)
                 print("x: "+str(i))
@@ -124,10 +150,17 @@ for i in range(len(json_data)):
                 print("z: " + str(i))
                 zlista.append(dictless["acceleration"][2])
                 ztlista.append(i)
+            importantdict["timestamp"]=naive
+            importantdict["groundtruth"]=dictless["groundtruthstate"]
+            finallistb.append(importantdict)
+        else:
+            dictless["groundtruthstate"]=5
+
+        finallist.append(dictless)
 
 #print(finallist)
-print(finallist)
 
+"""
 plt.scatter(xtlist,xlist)
 plt.scatter(ytlist,ylist)
 plt.scatter(ztlist,zlist)
@@ -136,13 +169,13 @@ plt.scatter(xtlista,xlista)
 plt.scatter(ytlista,ylista)
 plt.scatter(ztlista,zlista)
 plt.show()
-
-
 """
+
+
 #wearablestore[str(i)]=dictless
-store.append(dictless)
-parameters.insert_many(store)
-"""
+#store.append(dictless)
+parameters.insert_many(finallist)
+
 """
 #print(wearablestore)
 
