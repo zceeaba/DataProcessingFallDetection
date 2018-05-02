@@ -3,38 +3,50 @@ from datetime import datetime
 import datetime
 import dateutil.parser
 import pymongo
-"""
-from django.core.management import settings
-settings.configure()
-import os
+from matplotlib import pyplot as plt
+#client = MongoClient()
+client=pymongo.MongoClient('mongodb+srv://jayab96:H32yTpSBGi4xhVTO@ads-z5r3r.mongodb.net/first')
+#client = MongoClient(<Atlas connection string>)
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "FallDetect.settings")
-"""
 
-class MyDict(dict):
-    pass
-
-from pymongo import MongoClient
-
-client = MongoClient()
-
-client = MongoClient('localhost', 27017)
-"""
 wearablestore={}
 store=[]
 with open('wearable.json', 'r') as handle:
     json_data = [json.loads(line) for line in handle]
 db = client.wearable
 parameters = db.parameters
+finallist=[]
+xlist, ylist, zlist = [], [], []
+xtlist,ytlist,ztlist=[],[],[]
+xlista, ylista, zlista = [], [], []
+xtlista,ytlista,ztlista=[],[],[]
+tlist=[]
 for i in range(len(json_data)):
     dictless={}
+    previousaccelx=[]
+    previousaccely=[]
+    previousaccelz=[]
+    #startimes=[17:27:56,17:15:56]
+    #times={[8s,10s,21s,23s],[41s,45s,57,61],[75,80,93,97],[110,114,126,129],[142,146,159,164],[178,183,195,198],[219,222,234,237],[258,262,274,278],[299,303,313,317],[332,335,349,353],[378,382,392,396],[420,424,435,440],[452,456,466,470],[486,491,501,507]}
+    #timesb=[[8,10,21,25],[36,39,53,56],[68,72,86,91],[99,102,118,122],[134,138,151,155],[168,173,190,192],[210,212,230,235],[249,252,269,272],[281,283,302,306],[317,320,339,342],[357,360,373,377],[391,394,410,413],[426,429,443,446],[456,459,471,474]]
     #print(json_data[i])
     if json_data[i].get('e'):
         uid=json_data[i]["uid"][-2:]
         t = json_data[i]["e"][0]["t"]
-        accel = json_data[i]["e"][0]["v"]
+        accel=[0,0,0]
         id = json_data[i]["_id"]["$oid"]
         timestamp = json_data[i]["bt"]["$date"]
+
+        for j in range(len(json_data[i]["e"])):
+            v=json_data[i]["e"][j]["v"]
+            if len(v)>0:
+                accel[0] += json_data[i]["e"][j]["v"][0]
+                accel[1] += json_data[i]["e"][j]["v"][1]
+                accel[2] += json_data[i]["e"][j]["v"][2]
+            #print(accel)
+        #previousaccelx.append(accel[0])
+        #previousaccely.append(accel[1])
+        #previousaccelz.append(accel[2])
         if uid=="c0" or uid=="c1":
             t=t/2
             parsedtimestamp = dateutil.parser.parse(timestamp)
@@ -43,16 +55,65 @@ for i in range(len(json_data)):
             dictless["uid"]=uid
             dictless["result"]=result
             dictless["acceleration"]=accel
+        else:
+            parsedtimestamp = dateutil.parser.parse(timestamp)
+            result = parsedtimestamp - datetime.timedelta(seconds=t)
+            dictless["id"]=id
+            dictless["uid"]=uid
+            dictless["result"]=result
+            dictless["acceleration"]=accel
+
         parsedtimestamp = dateutil.parser.parse(timestamp)
-        result = parsedtimestamp - datetime.timedelta(seconds=t)
-        dictless["id"]=id
-        dictless["uid"]=uid
-        dictless["result"]=result
-        dictless["acceleration"]=accel
-        print(i)
-    #wearablestore[str(i)]=dictless
-    store.append(dictless)
+        naive = parsedtimestamp.replace(tzinfo=None)
+        if naive>datetime.datetime(2018, 03, 22, 17, 26, 56, 000) and naive<datetime.datetime(2018, 03, 22, 17,35,46 , 000) :
+            if abs(dictless["acceleration"][0])>7:
+                print(naive)
+                print("x: "+str(i))
+                xlist.append(dictless["acceleration"][0])
+                xtlist.append(i)
+            if  abs(dictless["acceleration"][1]) > 7:
+                print(naive)
+                print("y: " + str(i))
+                ylist.append(dictless["acceleration"][1])
+                ytlist.append(i)
+            if abs(dictless["acceleration"][2]) > 7:
+                print(naive)
+                print("z: " + str(i))
+                zlist.append(dictless["acceleration"][2])
+                ztlist.append(i)
+        if naive>datetime.datetime(2018, 03, 22, 17, 15, 56, 000) and naive<datetime.datetime(2018, 03, 22, 17,24,02 , 000) :
+            if abs(dictless["acceleration"][0])>7:
+                print(naive)
+                print("x: "+str(i))
+                xlista.append(dictless["acceleration"][0])
+                xtlista.append(i)
+            if  abs(dictless["acceleration"][1]) > 7:
+                print(naive)
+                print("y: " + str(i))
+                ylista.append(dictless["acceleration"][1])
+                ytlista.append(i)
+            if abs(dictless["acceleration"][2]) > 7:
+                print(naive)
+                print("z: " + str(i))
+                zlista.append(dictless["acceleration"][2])
+                ztlista.append(i)
+
+#print(finallist)
+plt.scatter(xtlist,xlist)
+plt.scatter(ytlist,ylist)
+plt.scatter(ztlist,zlist)
+plt.show()
+plt.scatter(xtlista,xlista)
+plt.scatter(ytlista,ylista)
+plt.scatter(ztlista,zlista)
+plt.show()
+
+
+"""
+#wearablestore[str(i)]=dictless
+store.append(dictless)
 parameters.insert_many(store)
+"""
 """
 #print(wearablestore)
 
@@ -72,7 +133,6 @@ for mul in range(len(jumps)-1):
     mulend=mul+1
     count=0
     for i in range(jumps[mul],jumps[mulend]):
-        dict=MyDict()
         dictless={}
         id = json_data[i]["_id"]["$oid"]
         uid=json_data[i]["uid"]
@@ -127,6 +187,7 @@ for mul in range(len(jumps)-1):
         print(i)
     #tens=(l*10000 for l in range(5900))
     """
+"""
     print(mul,mulend)
     keys=(i for i in range(jumps[mul],jumps[mulend]))
     dictionarystore={str(k):dictionarystore[str(k)] for k in keys}
@@ -136,7 +197,7 @@ for mul in range(len(jumps)-1):
     videoarray.append(dictionarystore)
     itemsarray.append(itemstore)
     """
-#print(videoarray)
-#print(itemsarray)
+"""
 videocolin.insert_many(videoarray)
 itemscolin.insert_many(itemsarray)
+"""
