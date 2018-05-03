@@ -32,11 +32,36 @@ for i in range(len(json_data)):
             data["id"] = id
             data["type"] = "silhouette"
             data["imagevalue"] = item["v"]
+            print(data["imagevalue"])
             import base64
-            encoded = base64.b64encode(data["imagevalue"])
-            decode = base64.b64decode(encoded)
+            #encoded = base64.b64encode(data["imagevalue"])
+            decode = base64.b64decode(data["imagevalue"])
             decodearray.append(decode)
 
+from PIL import Image
+
+filename = 'silhouette.jpg'  # I assume you have a way of picking unique filenames
+with open(filename, 'wb') as f:
+    f.write(decodearray[2])
+img = Image.open(filename)
+img.show()
+
+
+#plt.plot(timearray,videoarrayx)
+#plt.plot(timearray,videoarrayy)
+#plt.show()
+"""
+from PIL import Image
+# assume data contains your decoded image
+filename = 'some_image.jpg'  # I assume you have a way of picking unique filenames
+with open(filename, 'wb') as f:
+    f.write(decodearray[2])
+img = Image.open(filename)
+img.show()
+"""
+
+"""
+        """"""
         else:
             data["id"] = id
             if item["n"] == "frameId":
@@ -68,18 +93,5 @@ for i in range(len(json_data)):
                 data["type"] = "userID"
                 data["userid"] = item["v"]
 
-plt.plot(timearray,videoarrayx)
-plt.plot(timearray,videoarrayy)
-plt.show()
-#print(decodearray[20])
-import cStringIO
-"""
-from PIL import Image
-# assume data contains your decoded image
-filename = 'some_image.jpg'  # I assume you have a way of picking unique filenames
-with open(filename, 'wb') as f:
-    f.write(decodearray[2])
-img = Image.open(filename)
-img.show()
 """
 
