@@ -7,4 +7,4 @@ def readsilhouette():
                 objects.append(pickle.load(openfile))
             except EOFError:
                 break
-    return objects
+    return objects[0]
