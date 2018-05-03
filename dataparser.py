@@ -60,6 +60,9 @@ def wearable():
                 dictless["uid"]=uid
                 dictless["result"]=result
                 dictless["acceleration"]=accel
+                dictless["accelerationx"]=accel[0]
+                dictless["accelerationy"]=accel[1]
+                dictless["accelerationz"]=accel[2]
             else:
                 parsedtimestamp = dateutil.parser.parse(timestamp)
                 result = parsedtimestamp - datetime.timedelta(seconds=t)
@@ -67,6 +70,9 @@ def wearable():
                 dictless["uid"]=uid
                 dictless["result"]=result
                 dictless["acceleration"]=accel
+                dictless["accelerationx"]=accel[0]
+                dictless["accelerationy"]=accel[1]
+                dictless["accelerationz"]=accel[2]
             #dictless["groundtruthstate"]=3
             fallstate=[0,1,2,3]
             parsedtimestamp = dateutil.parser.parse(timestamp)
