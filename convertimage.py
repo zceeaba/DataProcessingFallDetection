@@ -95,6 +95,10 @@ for i in range(len(json_data)):
                     finallist.append(data)
                     #decodearray.append(decode)
 print(finallist)
+import pickle
+with open("silhouettes.txt", "wb") as myFile:
+    pickle.dump(finallist, myFile)
+
 from PIL import Image
 
 filename = 'silhouette.jpg'  # I assume you have a way of picking unique filenames
