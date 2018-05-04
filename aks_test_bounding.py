@@ -14,10 +14,14 @@ dict_2D_cen = {}
 
 for i in range(len(json_data)):
         if len(json_data[i]["e"]) < 2:
-            dict_silhouette[str(json_data[i]["bt"]["$date"])] = json_data[i]["e"][0]["v"]
+            parsedtimestamp = dateutil.parser.parse(json_data[i]["bt"]["$date"])
+            naive = parsedtimestamp.replace(tzinfo=None)
+            dict_silhouette[naive] = json_data[i]["e"][0]["v"]
         else :
-            dict_2D_bb[str(json_data[i]["bt"]["$date"])] = json_data[i]["e"][2]["v"]
-            dict_2D_cen[str(json_data[i]["bt"]["$date"])] = json_data[i]["e"][3]["v"]
+            parsedtimestamp = dateutil.parser.parse(json_data[i]["bt"]["$date"])
+            naive = parsedtimestamp.replace(tzinfo=None)
+            dict_2D_bb[naive] = json_data[i]["e"][2]["v"]
+            dict_2D_cen[naive] = json_data[i]["e"][3]["v"]
 
 common_keys = set(dict_silhouette.keys()) & set(dict_2D_bb.keys()) & set(dict_2D_cen.keys())
 
