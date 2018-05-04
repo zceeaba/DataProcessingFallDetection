@@ -1,4 +1,6 @@
 import json
+import dateutil
+import numpy
 
 with open('video.json', 'r') as handle:
     json_data = [json.loads(line) for line in handle]
@@ -24,7 +26,17 @@ for i in range(len(json_data)):
 
 time_stamp = []
 for i in range(len(json_data)):
-    time_stamp.append(json_data["bt"])
+    time_stamp.append(json_data[i]["bt"]["$date"])
+
+cleaned_time_stamp = []
+for i in time_stamp: 
+    cleaned_time_stamp.append(dateutil.parser.parse(i).replace(tzinfo=None))
+
+numpy_time_stamp = numpy.array(cleaned_time_stamp)
+arr = numpy.diff(numpy_time_stamp)
+
+print(numpy_time_stamp[:6])
+print(arr[:5])
 #import numpy
 #
 #x = numpy.array(no_sil)
