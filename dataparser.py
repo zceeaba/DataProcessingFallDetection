@@ -172,8 +172,8 @@ def wearable():
                     groundtlistb.append(i)
                     #finallistb.append(importantdict)
                     finallist.append(dictless)
-            else:
-                dictless["groundtruthstate"]=5
+            #else:
+            #    dictless["groundtruthstate"]=5
 
     return finallist
 
