@@ -67,7 +67,7 @@ z_acc_value = []
 for index in range(len(wearable_data)):
     data = wearable_data[index]
     naive = data['result'].replace(tzinfo=None)
-    if data['uid'] == 'c0' and datetime.datetime(2018, 3, 22, 17, 36, 46, 0) > naive > datetime.datetime(2018,
+    if data['uid'] == 'c0' and datetime.datetime(2018, 3, 22, 17, 29, 46, 0) > naive > datetime.datetime(2018,
                                                                                                          3, 22,
                                                                                                          17,
                                                                                                          27,
@@ -77,14 +77,37 @@ for index in range(len(wearable_data)):
         x_acc_value.append(data["acceleration"][0])
         y_acc_value.append(data["acceleration"][1])
         z_acc_value.append(data["acceleration"][2])
-for fall_time in ground_truth_fall_time:
-    plt.axvline(fall_time, c='black', ls='--')
+# for fall_time in ground_truth_fall_time:
+#      plt.axvline(fall_time, c='black', ls='--')
+t=1
+for lay_time in ground_truth_lay_time:
+    if t:
+        plt.axvline(lay_time, c='black', ls='dotted', lw=2.0, label='Fallen')
+    else:
+        plt.axvline(lay_time, c='black', ls='dotted', lw=2.0)
+    t = 0
+# for get_up_time in ground_truth_get_up_time:
+#     plt.axvline(get_up_time, c='red', ls='--')
+# for stand_time in ground_truth_stand_time:
+#      plt.axvline(stand_time, c='blue', ls='--')
+# for get_up_time in ground_truth_get_up_time:
+#     plt.axvline(get_up_time, c='red', ls='--')
+# for stand_time in ground_truth_stand_time:
+#     plt.axvline(stand_time, c='blue', ls='--')
+x_acc_value = np.array(x_acc_value)
+y_acc_value = np.array(y_acc_value)
+z_acc_value = np.array(z_acc_value)
+magnitude = np.sqrt(np.power(convolution_filter(x_acc_value, my_weight), 2)+np.power(convolution_filter(y_acc_value, my_weight), 2)+np.power(convolution_filter(z_acc_value, my_weight), 2))
 
-
-
-plt.plot(t_value, convolution_filter(x_acc_value, weight=my_weight))
-
+x_line = plt.plot(t_value, x_acc_value, label='x acceleration')
+y_line = plt.plot(t_value, y_acc_value, label='y acceleration')
+z_line = plt.plot(t_value, z_acc_value, label='z acceleration')
+m_line = plt.plot(t_value, magnitude, label='magnitude', c='black')
+plt.xlabel('Timestamp(s)')
+plt.ylabel('Acceleration Value(m/s^2)')
+#z_line = plt.plot(t_value, magnitude, label='magnitude')
 plt.gcf().autofmt_xdate()
 myFmt = matplotlib.dates.DateFormatter('%H:%M:%S')
 plt.gca().xaxis.set_major_formatter(myFmt)
+plt.legend()
 plt.show()
