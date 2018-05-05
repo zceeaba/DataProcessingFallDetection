@@ -14,7 +14,7 @@ videoarrayy=[]
 decodearray=[]
 finallist=[]
 flag = 3
-for i in range(23000,85000):
+for i in range(len(json_data)):
     dictless = {}
     id = json_data[i]["_id"]["$oid"]
     uid = json_data[i]["uid"]
@@ -42,7 +42,7 @@ for i in range(23000,85000):
                         # print(checktime)
                         if checktime < 1 and checktime > -1:
                             data["groundtruthstate"] = index
-                        flag = index
+                            flag = index
                 if flag == 1:
                     data["groundtruthstate"] = 1
                 elif flag == 2:
@@ -56,10 +56,8 @@ for i in range(23000,85000):
                 data["time"]=naive
                 data["imagevalue"] = item["v"]
                 import base64
-                #encoded = base64.b64encode(data["imagevalue"])
                 decode = base64.b64decode(data["imagevalue"])
                 data["imagevalue"]=decode
-                #decodearray.append(decode)
                 finallist.append(data)
             if naive>datetime.datetime(2018, 3, 22, 17, 15, 56, 0) and naive<datetime.datetime(2018, 3, 22, 17,24,2,0) :
                 for list in timesb:

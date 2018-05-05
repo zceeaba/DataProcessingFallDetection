@@ -5,20 +5,42 @@ import dateutil.parser
 import pymongo
 import numpy as np
 from matplotlib import pyplot as plt
+import math
 #client = MongoClient()
 #client=pymongo.MongoClient('mongodb+srv://jayab96:H32yTpSBGi4xhVTO@ads-z5r3r.mongodb.net/')
 #client = MongoClient(<Atlas connection string>)
 
 #client = pymongo.MongoClient('mongodb://localhost:27017/')
+def convolution_filter(values, weight=[1, 1, 1, 1, 1]):
+    weight_size = len(weight)
+    value_size = len(values)
+    window_length = int((weight_size - 1) / 2)
+    result = np.zeros((value_size))
+    weight = np.array(weight)
+    weight_sum = np.sum(weight)
+    for i in range(value_size):
+        pre_list = np.zeros((window_length))
+        post_list = np.zeros((window_length))
+        for j in range(window_length, 0, -1):
+            if not (i - j < 0):
+                pre_list[window_length - j] = values[i - j]
+            if not (i + j > value_size - 1):
+                post_list[j - 1] = values[i + j]
+        window = np.append(np.append(pre_list, values[i]), post_list)
+        result[i] = window.dot(weight) / weight_sum
+    return result
+
 def wearable():
     wearablestore={}
     store=[]
+    my_weight = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
     with open('wearable.json', 'r') as handle:
         json_data = [json.loads(line) for line in handle]
     #db = client.wearabletest
     #parameters = db.parameters
     finallist=[]
     finallistb=[]
+    axlist, aylist, azlist = [], [], []
     xlist, ylist, zlist = [], [], []
     xtlist,ytlist,ztlist=[],[],[]
     xlista, ylista, zlista = [], [], []
@@ -61,9 +83,11 @@ def wearable():
                 dictless["uid"]=uid
                 dictless["result"]=result
                 dictless["acceleration"]=accel
+                dictless["average"]=(accel[0]+accel[1]+accel[2])/3
                 dictless["accelerationx"]=accel[0]
                 dictless["accelerationy"]=accel[1]
                 dictless["accelerationz"]=accel[2]
+                dictless["magnitude"]=math.sqrt((dictless["accelerationx"])**2+(dictless["accelerationy"])**2+(dictless["accelerationz"])**2)
             else:
                 parsedtimestamp = dateutil.parser.parse(timestamp)
                 result = parsedtimestamp - datetime.timedelta(seconds=t)
@@ -71,10 +95,12 @@ def wearable():
                 dictless["uid"]=uid
                 dictless["result"]=result
                 dictless["acceleration"]=accel
+                dictless["average"]=(accel[0]+accel[1]+accel[2])/3
                 dictless["accelerationx"]=accel[0]
                 dictless["accelerationy"]=accel[1]
                 dictless["accelerationz"]=accel[2]
-            #dictless["groundtruthstate"]=3
+                dictless["magnitude"]=math.sqrt((dictless["accelerationx"])**2+(dictless["accelerationy"])**2+(dictless["accelerationz"])**2)
+
             fallstate=[0,1,2,3]
             parsedtimestamp = dateutil.parser.parse(timestamp)
             naive = parsedtimestamp.replace(tzinfo=None)
@@ -128,6 +154,9 @@ def wearable():
                     groundtlist.append(i)
                     #finallist.append(importantdict)
                     finallist.append(dictless)
+                    axlist.append(dictless["accelerationx"])
+                    aylist.append(dictless["accelerationy"])
+                    azlist.append(dictless["accelerationz"])
             else:
                 dictless["groundtruthstate"]=5
             if naive>datetime.datetime(2018, 3, 22, 17, 15, 56, 0) and naive<datetime.datetime(2018, 3, 22, 17,24,2 , 0) :
@@ -173,8 +202,24 @@ def wearable():
                     groundtlistb.append(i)
                     #finallistb.append(importantdict)
                     finallist.append(dictless)
+                    axlist.append(dictless["accelerationx"])
+                    aylist.append(dictless["accelerationy"])
+                    azlist.append(dictless["accelerationz"])
             #else:
             #    dictless["groundtruthstate"]=5
+
+    x_acc_value=np.array(axlist)
+    y_acc_value=np.array(aylist)
+    z_acc_value=np.array(azlist)
+    magnitude = np.sqrt(
+        np.power(convolution_filter(x_acc_value, my_weight), 2) + np.power(convolution_filter(y_acc_value, my_weight),
+                                                                           2) + np.power(
+            convolution_filter(z_acc_value, my_weight), 2))
+    for i in range(len(finallist)):
+        print(i)
+        finallist[i]["magn"]=magnitude[i]
+
+    print(finallist)
     return finallist
 
 def normalizedwearable(results):
