@@ -6,6 +6,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 import dataparser
 import matplotlib
+import math
 
 ground_truth_fall_time = []
 ground_truth_fall_timeb = []
@@ -56,7 +57,7 @@ for times in times_b:
     ground_truth_get_up_timeb.append(start_time_b + datetime.timedelta(0, times[2]))
     ground_truth_stand_timeb.append(start_time_b + datetime.timedelta(0, times[3]))
 
-my_weight = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+my_weight = [1, 1.2, 1.2, 1.5, 1.2, 1.2, 1]
 
 wearable_data = dataparser.wearable()
 wearable_data.sort(key=lambda x: x['result'])
@@ -67,7 +68,7 @@ z_acc_value = []
 for index in range(len(wearable_data)):
     data = wearable_data[index]
     naive = data['result'].replace(tzinfo=None)
-    if data['uid'] == 'c0' and datetime.datetime(2018, 3, 22, 17, 29, 46, 0) > naive > datetime.datetime(2018,
+    if data['uid'] == 'c0' and datetime.datetime(2018, 3, 22, 17, 36, 46, 0) > naive > datetime.datetime(2018,
                                                                                                          3, 22,
                                                                                                          17,
                                                                                                          27,
@@ -79,15 +80,7 @@ for index in range(len(wearable_data)):
         z_acc_value.append(data["acceleration"][2])
 # for fall_time in ground_truth_fall_time:
 #      plt.axvline(fall_time, c='black', ls='--')
-t=1
-for lay_time in ground_truth_lay_time:
-    if t:
-        plt.axvline(lay_time, c='black', ls='dotted', lw=2.0, label='Fallen')
-    else:
-        plt.axvline(lay_time, c='black', ls='dotted', lw=2.0)
-    t = 0
-# for get_up_time in ground_truth_get_up_time:
-#     plt.axvline(get_up_time, c='red', ls='--')
+
 # for stand_time in ground_truth_stand_time:
 #      plt.axvline(stand_time, c='blue', ls='--')
 # for get_up_time in ground_truth_get_up_time:
@@ -97,15 +90,55 @@ for lay_time in ground_truth_lay_time:
 x_acc_value = np.array(x_acc_value)
 y_acc_value = np.array(y_acc_value)
 z_acc_value = np.array(z_acc_value)
-magnitude = np.sqrt(np.power(convolution_filter(x_acc_value, my_weight), 2)+np.power(convolution_filter(y_acc_value, my_weight), 2)+np.power(convolution_filter(z_acc_value, my_weight), 2))
+magnitude = np.sqrt(np.power(x_acc_value, 2) + np.power(y_acc_value, 2) + np.power(z_acc_value, 2))
 
-x_line = plt.plot(t_value, x_acc_value, label='x acceleration')
-y_line = plt.plot(t_value, y_acc_value, label='y acceleration')
-z_line = plt.plot(t_value, z_acc_value, label='z acceleration')
-m_line = plt.plot(t_value, magnitude, label='magnitude', c='black')
+def normalize(data):
+    zero_mean = (data - np.mean(data))
+    return zero_mean/np.max(np.abs(zero_mean))
+
+mode = 2
+if mode == 1:
+    x_data = convolution_filter(x_acc_value, my_weight)
+    y_data = convolution_filter(y_acc_value, my_weight)
+    z_data = convolution_filter(z_acc_value, my_weight)
+    m_data = np.sqrt(np.power(x_data, 2) + np.power(y_data, 2) + np.power(z_data, 2))
+
+elif mode == 0:
+    x_data = x_acc_value
+    y_data = y_acc_value
+    z_data = z_acc_value
+    m_data = magnitude
+
+elif mode == 2:
+    x_data = normalize(convolution_filter(x_acc_value, my_weight))
+    y_data = normalize(convolution_filter(y_acc_value, my_weight))
+    z_data = normalize(convolution_filter(z_acc_value, my_weight))
+    m_data = normalize(np.sqrt(np.power(convolution_filter(x_acc_value, my_weight), 2) + np.power(convolution_filter(y_acc_value, my_weight), 2) + np.power(convolution_filter(z_acc_value, my_weight), 2)))
+
+x_line = plt.plot(t_value, x_data, lw='2', label='x acceleration')
+y_line = plt.plot(t_value, y_data, lw='2', label='y acceleration')
+z_line = plt.plot(t_value, z_data, lw='2', label='z acceleration')
+m_line = plt.plot(t_value, m_data, lw='2', c='black', label='magnitude')
+
+t = 1
+for lay_time in ground_truth_lay_time:
+    if t:
+        plt.axvline(lay_time, c='black', ls='dotted', lw=3, label='Fallen')
+    else:
+        plt.axvline(lay_time, c='black', ls='dotted', lw=3)
+    t = 0
+t = 1
+for get_up_time in ground_truth_get_up_time:
+    if t:
+        plt.axvline(get_up_time, c='m', ls='dotted', lw=3, label='Get up')
+    else:
+        plt.axvline(get_up_time, c='m', ls='dotted', lw=3)
+    t = 0
 plt.xlabel('Timestamp(s)')
 plt.ylabel('Acceleration Value(m/s^2)')
-#z_line = plt.plot(t_value, magnitude, label='magnitude')
+plt.xlim((datetime.datetime(2018, 3, 22, 17, 28, 32), datetime.datetime(2018, 3, 22, 17, 29, 44)))
+plt.ylim((-1, 1))
+
 plt.gcf().autofmt_xdate()
 myFmt = matplotlib.dates.DateFormatter('%H:%M:%S')
 plt.gca().xaxis.set_major_formatter(myFmt)
