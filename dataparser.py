@@ -3,6 +3,7 @@ from datetime import datetime
 import datetime
 import dateutil.parser
 import pymongo
+import numpy as np
 from matplotlib import pyplot as plt
 #client = MongoClient()
 #client=pymongo.MongoClient('mongodb+srv://jayab96:H32yTpSBGi4xhVTO@ads-z5r3r.mongodb.net/')
@@ -174,10 +175,34 @@ def wearable():
                     finallist.append(dictless)
             #else:
             #    dictless["groundtruthstate"]=5
-
     return finallist
 
-#print(finallist)
+def normalizedwearable(results):
+    accelx,accely,accelz=[],[],[]
+    print(results)
+    for i in range(len(results)):
+        accelx.append(results[i]["accelerationx"])
+        accely.append(results[i]["accelerationy"])
+        accelz.append(results[i]["accelerationz"])
+    meanx=np.mean(np.array(accelx))
+    meany=np.mean(np.array(accely))
+    meanz=np.mean(np.array(accelz))
+    stdx=np.std(np.array(accelx))
+    stdy=np.std(np.array(accely))
+    stdz=np.std(np.array(accelz))
+    maxx=max(accelx)
+    maxy=max(accely)
+    maxz=max(accelz)
+    print(meanx,meany,meanz,stdx,stdy,stdz)
+    for i in range(len(results)):
+        #results[i]["accelerationx"]=(results[i]["accelerationx"]-meanx)/stdx
+        #results[i]["accelerationy"]=(results[i]["accelerationy"]-meany)/stdy
+        #results[i]["accelerationz"]=(results[i]["accelerationz"]-meanz)/stdz
+        results[i]["accelerationx"]=float(results[i]["accelerationx"])/maxx
+        results[i]["accelerationy"]=float(results[i]["accelerationy"])/maxy
+        results[i]["accelerationz"]=float(results[i]["accelerationz"])/maxz
+
+    return results
 """
 
 plt.scatter(xtlist,xlist)
