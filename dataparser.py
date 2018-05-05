@@ -195,12 +195,12 @@ def normalizedwearable(results):
     maxz=max(accelz)
     print(meanx,meany,meanz,stdx,stdy,stdz)
     for i in range(len(results)):
-        #results[i]["accelerationx"]=(results[i]["accelerationx"]-meanx)/stdx
-        #results[i]["accelerationy"]=(results[i]["accelerationy"]-meany)/stdy
-        #results[i]["accelerationz"]=(results[i]["accelerationz"]-meanz)/stdz
-        results[i]["accelerationx"]=float(results[i]["accelerationx"])/maxx
-        results[i]["accelerationy"]=float(results[i]["accelerationy"])/maxy
-        results[i]["accelerationz"]=float(results[i]["accelerationz"])/maxz
+        results[i]["accelerationx"]=(results[i]["accelerationx"]-meanx)/stdx
+        results[i]["accelerationy"]=(results[i]["accelerationy"]-meany)/stdy
+        results[i]["accelerationz"]=(results[i]["accelerationz"]-meanz)/stdz
+        #results[i]["accelerationx"]=float(results[i]["accelerationx"])/maxx
+        #results[i]["accelerationy"]=float(results[i]["accelerationy"])/maxy
+        #results[i]["accelerationz"]=float(results[i]["accelerationz"])/maxz
 
     return results
 """
