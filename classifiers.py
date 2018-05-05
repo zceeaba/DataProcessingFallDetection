@@ -7,6 +7,7 @@ from sklearn.ensemble import RandomForestClassifier as RF
 from sklearn.neighbors import KNeighborsClassifier as KNN
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import KFold
+import scikitplot as skplt
 
 def run_cv(X,y,clf_class,**kwargs):
     # Construct a kfolds object
