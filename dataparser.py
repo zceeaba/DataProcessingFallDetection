@@ -136,18 +136,23 @@ def wearable():
                     if abs(dictless["acceleration"][0])>7:
                         #print(naive)
                         print("x: "+str(i))
+                        dictless["threshold"]=1
                         xlist.append(dictless["acceleration"][0])
                         xtlist.append(i)
-                    if  abs(dictless["acceleration"][1]) > 7:
+                    elif  abs(dictless["acceleration"][1]) > 7:
                         #print(naive)
                         print("y: " + str(i))
+                        dictless["threshold"]=1
                         ylist.append(dictless["acceleration"][1])
                         ytlist.append(i)
-                    if abs(dictless["acceleration"][2]) > 7:
+                    elif abs(dictless["acceleration"][2]) > 7:
                         #print(naive)
                         print("z: " + str(i))
+                        dictless["threshold"]=1
                         zlist.append(dictless["acceleration"][2])
                         ztlist.append(i)
+                    else:
+                        dictless["threshold"]=0
                     importantdict["timestamp"]=naive
                     importantdict["groundtruth"]=dictless["groundtruthstate"]
                     groundnewlist.append(dictless["groundtruthstate"])
@@ -183,18 +188,23 @@ def wearable():
                     if abs(dictless["acceleration"][0])>7:
                         print(naive)
                         print("x: "+str(i))
+                        dictless["threshold"]=1
                         xlista.append(dictless["acceleration"][0])
                         xtlista.append(i)
-                    if  abs(dictless["acceleration"][1]) > 7:
+                    elif  abs(dictless["acceleration"][1]) > 7:
                         print(naive)
                         print("y: " + str(i))
+                        dictless["threshold"]=1
                         ylista.append(dictless["acceleration"][1])
                         ytlista.append(i)
-                    if abs(dictless["acceleration"][2]) > 7:
+                    elif abs(dictless["acceleration"][2]) > 7:
                         print(naive)
                         print("z: " + str(i))
+                        dictless["threshold"]=1
                         zlista.append(dictless["acceleration"][2])
                         ztlista.append(i)
+                    else:
+                        dictless["threshold"]=0
                     print(dictless["groundtruthstate"])
                     importantdict["timestamp"]=naive
                     importantdict["groundtruth"]=dictless["groundtruthstate"]
@@ -223,30 +233,44 @@ def wearable():
     return finallist
 
 def normalizedwearable(results):
-    accelx,accely,accelz=[],[],[]
+    accelx,accely,accelz,magn,magnitude,threshold=[],[],[],[],[],[]
     print(results)
     for i in range(len(results)):
         accelx.append(results[i]["accelerationx"])
         accely.append(results[i]["accelerationy"])
         accelz.append(results[i]["accelerationz"])
+        magn.append(results[i]["magn"])
+        magnitude.append(results[i]["magnitude"])
+        threshold.append(results[i]["threshold"])
     meanx=np.mean(np.array(accelx))
     meany=np.mean(np.array(accely))
     meanz=np.mean(np.array(accelz))
+    meanmagnitude=np.mean(np.array(magnitude))
+    meanmagn=np.mean(np.array(magn))
+    meanthreshold=np.mean(np.array(threshold))
     stdx=np.std(np.array(accelx))
     stdy=np.std(np.array(accely))
     stdz=np.std(np.array(accelz))
+    meanmagnitude=np.std(np.array(magnitude))
+    meanmagn=np.std(np.array(magn))
+    meanthreshold=np.std(np.array(threshold))
     maxx=max(accelx)
     maxy=max(accely)
     maxz=max(accelz)
-    print(meanx,meany,meanz,stdx,stdy,stdz)
+    maxmagnitude=max(magnitude)
+    maxmagn=max(magn)
+    maxthreshold=max(threshold)
+    #print(meanx,meany,meanz,stdx,stdy,stdz)
     for i in range(len(results)):
-        results[i]["accelerationx"]=(results[i]["accelerationx"]-meanx)/stdx
-        results[i]["accelerationy"]=(results[i]["accelerationy"]-meany)/stdy
-        results[i]["accelerationz"]=(results[i]["accelerationz"]-meanz)/stdz
-        #results[i]["accelerationx"]=float(results[i]["accelerationx"])/maxx
-        #results[i]["accelerationy"]=float(results[i]["accelerationy"])/maxy
-        #results[i]["accelerationz"]=float(results[i]["accelerationz"])/maxz
-
+        #results[i]["accelerationx"]=(results[i]["accelerationx"]-meanx)/stdx
+        #results[i]["accelerationy"]=(results[i]["accelerationy"]-meany)/stdy
+        #results[i]["accelerationz"]=(results[i]["accelerationz"]-meanz)/stdz
+        results[i]["accelerationx"]=float(results[i]["accelerationx"])/maxx
+        results[i]["accelerationy"]=float(results[i]["accelerationy"])/maxy
+        results[i]["accelerationz"]=float(results[i]["accelerationz"])/maxz
+        results[i]["magnitude"]=float(results[i]["magnitude"])/maxmagnitude
+        results[i]["magn"]=float(results[i]["magn"])/maxmagn
+        results[i]["threshold"]=float(results[i]["threshold"])/maxthreshold
     return results
 """
 
