@@ -115,13 +115,12 @@ def wearable():
 
             if naive>datetime.datetime(2018, 3, 22, 17, 27, 56, 0) and naive<datetime.datetime(2018, 3, 22, 17,36,46 , 0) :
                 if dictless["uid"]=="c0" or dictless["uid"]=="c1":
-                    print(dictless["uid"])
                     for list in times:
                         for index in range(len(list)):
                             eventimestamp = datetime.datetime(2018, 3, 22, 17, 27, 56, 0) + datetime.timedelta(0, list[index])
                             checktime=(eventimestamp - naive).total_seconds()
                             #print(checktime)
-                            if checktime<1 and checktime >-1:
+                            if checktime<0.5 and checktime >-0.5:
                                 dictless["groundtruthstate"]=index
                                 flag=index
                     if flag == 1:
@@ -135,19 +134,18 @@ def wearable():
 
                     if abs(dictless["acceleration"][0])>7:
                         #print(naive)
-                        print("x: "+str(i))
+
                         dictless["threshold"]=1
                         xlist.append(dictless["acceleration"][0])
                         xtlist.append(i)
                     elif  abs(dictless["acceleration"][1]) > 7:
                         #print(naive)
-                        print("y: " + str(i))
+
                         dictless["threshold"]=1
                         ylist.append(dictless["acceleration"][1])
                         ytlist.append(i)
                     elif abs(dictless["acceleration"][2]) > 7:
                         #print(naive)
-                        print("z: " + str(i))
                         dictless["threshold"]=1
                         zlist.append(dictless["acceleration"][2])
                         ztlist.append(i)
@@ -172,7 +170,7 @@ def wearable():
                             eventimestamp = datetime.datetime(2018, 3, 22, 17, 15, 56, 0) + datetime.timedelta(0, list[index])
                             checktime=(eventimestamp - naive).total_seconds()
                             #print(checktime)
-                            if checktime<1 and checktime >-1:
+                            if checktime<0.5 and checktime >-0.5:
                                 dictless["groundtruthstate"]=index
                                 flag=index
 
@@ -228,6 +226,7 @@ def wearable():
     for i in range(len(finallist)):
         print(i)
         finallist[i]["magn"]=magnitude[i]
+
 
     print(finallist)
     return finallist
